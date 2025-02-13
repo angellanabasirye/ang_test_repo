@@ -1,0 +1,109 @@
+---
+title: "Untitled"
+author: "Angella Nabasirye"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(gridExtra)
+library(knitr)
+library(grid)
+```
+
+## Load Data
+```{r cars}
+df <- read.csv("D:/intro to R/R practise datasets/Maternal Health Risk Data Set.csv")
+```
+
+## Mean Age by Risk Level
+```{r pressure, echo=FALSE}
+mean_age_by_risk <- df %>%
+  group_by(RiskLevel) %>%
+  summarise(mean_age = mean(Age, na.rm = TRUE)) %>% arrange(desc(mean_age))
+
+print(mean_age_by_risk)
+```
+## Relationship Between Age and Risk Level. 
+- The mean age increases as the risk level increases
+- Older individuals are more likely to fall into the high-risk category.
+- Younger individuals tend to be in the low-risk category.
+- This suggests that age is a contributing factor to health risk levels, possibly due to age-related health conditions like hypertension, diabetes, or cardiovascular diseases.
+
+## median_diastolic_by_risk
+
+```{r}
+median_diastolic_by_risk <- df %>%
+  group_by(RiskLevel) %>%
+  summarise(median_diastolic = median(DiastolicBP, na.rm = TRUE)) %>%
+  arrange(median_diastolic)
+
+print(median_diastolic_by_risk)
+```
+## Relationship Between Diastolic Blood Pressure and Risk Level
+- The median diastolic blood pressure (BP) is higher for high-risk individuals
+- Individuals in the high-risk group have significantly higher diastolic BP compared to the mid- and low-risk groups.
+- Diastolic BP of 90 mmHg suggests hypertension (high blood pressure), which is a strong risk factor for cardiovascular diseases.
+- The low and mid-risk groups have similar median diastolic BP (75 mmHg), meaning there might not be a significant difference in BP between these two groups.
+
+## Summary of the Output
+- The first analysis tells us which risk level has the highest average age.
+- The second analysis shows which risk level has the lowest and highest median diastolic blood pressure.
+- These insights help in understanding how age and blood pressure correlate with risk levels.
+
+## QN 2 Creating a new column SystolicRate
+```{r}
+df <- df %>% mutate(SystolicRate = SystolicBP / Age)
+```
+## QN 3 
+```{r}
+filtered_data <- df %>%
+  mutate(SystolicRate = SystolicBP / Age)
+```
+## Filter age ≤ 40
+```{r}
+colnames(df)
+head(df) 
+str(df)
+```
+```{r}
+filtered_data <- df %>%
+  filter(Age <= 40) %>%  
+  group_by(RiskLevel) %>%
+  summarise(mean_systolic_rate = mean(SystolicRate, na.rm = TRUE)) %>%  
+  arrange(desc(mean_systolic_rate))
+
+print(filtered_data)
+```
+
+## Qn 4 Selecting continuous variables
+```{r}
+continuous_vars <- c("Age", "SystolicBP", "DiastolicBP", "BS", "BodyTemp", "HeartRate", "SystolicRate")
+```
+
+### Converted dataset to long format for easy plotting
+```{r}
+df_long <- df %>%
+  pivot_longer(cols = all_of(continuous_vars), names_to = "Variable", values_to = "Value")
+```
+
+### Plot histograms
+```{r}
+ggplot(df_long, aes(x = Value)) +
+  geom_histogram(fill = "skyblue", color = "black", bins = 30) +
+  facet_wrap(~ Variable, scales = "free") +
+  labs(title = "Histograms of Continuous Variables", x = "Value", y = "Frequency") +
+  theme_minimal()
+```
+
+### Boxplots by Risk Level
+```{r}
+
+```
+
+
